@@ -1,0 +1,44 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${DB_NAME:project_db}
+    username: ${DB_USER:project}
+    password: ${DB_PASSWORD:project}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:your-email@gmail.com}
+    password: ${MAIL_PASSWORD:your-password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+jwt:
+  secret: ${JWT_SECRET:dGhpc2lzYXZlcnlsb25nand0c2VjcmV0a2V5Zm9ydGhlYWJsYXlzaGFyaW1vdnRhc2ttYW5hZ2VtZW50c3lzdGVt}
+  expiration: 86400000
+
+file:
+  upload-dir: /app/uploads
+
+logging:
+  level:
+    root: INFO
+    org.springframework.security: WARN
+  file:
+    name: /app/logs/taskmanagement.log
+
