@@ -24,13 +24,15 @@ public interface AblaySharimovTaskRepository extends JpaRepository<AblaySharimov
     @Query("SELECT t FROM AblaySharimovTask t WHERE (LOWER(t.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.description) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<AblaySharimovTask> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
-    @Query("SELECT t FROM AblaySharimovTask t WHERE " +
-            "(:projectId IS NULL OR t.project.id = :projectId) AND " +
-            "(:status IS NULL OR t.status = :status) AND " +
-            "(:priority IS NULL OR t.priority = :priority) AND " +
-            "(:assigneeId IS NULL OR t.assignee.id = :assigneeId) AND " +
-            "(:dueDateFrom IS NULL OR t.dueDate >= :dueDateFrom) AND " +
-            "(:dueDateTo IS NULL OR t.dueDate <= :dueDateTo)")
+    @Query("""
+            SELECT t FROM AblaySharimovTask t 
+            WHERE (:projectId IS NULL OR t.project.id = :projectId)
+            AND (:status IS NULL OR t.status = :status)
+            AND (:priority IS NULL OR t.priority = :priority)
+            AND (:assigneeId IS NULL OR t.assignee.id = :assigneeId)
+            AND (:dueDateFrom IS NULL OR t.dueDate >= :dueDateFrom)
+            AND (:dueDateTo IS NULL OR t.dueDate <= :dueDateTo)
+            """)
     Page<AblaySharimovTask> filterTasks(
             @Param("projectId") Long projectId,
             @Param("status") AblaySharimovTaskStatus status,
