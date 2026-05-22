@@ -1,0 +1,14 @@
+package kz.ablaysharimov.taskmanagementsystem.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+public class AblaySharimovSwaggerRedirectController {
+
+    @GetMapping({"/swagger-ui", "/swagger-ui/"})
+    public String redirectToSwaggerUi() {
+        return "redirect:/swagger-ui/index.html";
+    }
+}
+

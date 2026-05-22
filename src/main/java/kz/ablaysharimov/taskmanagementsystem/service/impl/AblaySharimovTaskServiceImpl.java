@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -96,12 +97,39 @@ public class AblaySharimovTaskServiceImpl implements AblaySharimovTaskService {
                                                      Long assigneeId, String search, LocalDateTime dueDateFrom, LocalDateTime dueDateTo, Pageable pageable) {
         log.debug("Getting tasks with filters");
 
-        if (search != null && !search.isEmpty()) {
-            return taskRepository.searchByKeyword(search, pageable).map(taskMapper::toResponse);
-        }
+        Specification<AblaySharimovTask> spec = (root, query, cb) -> {
+            List<jakarta.persistence.criteria.Predicate> predicates = new java.util.ArrayList<>();
 
-        return taskRepository.filterTasks(projectId, status, priority, assigneeId, dueDateFrom, dueDateTo, pageable)
-                .map(taskMapper::toResponse);
+            if (projectId != null) {
+                predicates.add(cb.equal(root.get("project").get("id"), projectId));
+            }
+            if (status != null) {
+                predicates.add(cb.equal(root.get("status"), status));
+            }
+            if (priority != null) {
+                predicates.add(cb.equal(root.get("priority"), priority));
+            }
+            if (assigneeId != null) {
+                predicates.add(cb.equal(root.get("assignee").get("id"), assigneeId));
+            }
+            if (dueDateFrom != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("dueDate"), dueDateFrom));
+            }
+            if (dueDateTo != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"), dueDateTo));
+            }
+            if (search != null && !search.isBlank()) {
+                String likePattern = "%" + search.trim().toLowerCase() + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("title")), likePattern),
+                        cb.like(cb.lower(root.get("description")), likePattern)
+                ));
+            }
+
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+
+        return taskRepository.findAll(spec, pageable).map(taskMapper::toResponse);
     }
 
     @Override
@@ -132,7 +160,7 @@ public class AblaySharimovTaskServiceImpl implements AblaySharimovTaskService {
     @Override
     public void deleteTask(Long id) {
         log.info("Deleting task: {}", id);
-        AblaySharimovTask task = taskRepository.findById(id)
+        taskRepository.findById(id)
                 .orElseThrow(() -> new AblaySharimovResourceNotFoundException("Task not found with id: " + id));
         taskRepository.deleteById(id);
     }

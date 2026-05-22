@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.util.Base64;
+
 import java.util.Date;
 import java.util.function.Function;
 
@@ -24,8 +24,8 @@ public class AblaySharimovJwtUtil {
     private Long jwtExpirationMs;
 
     private SecretKey getSigningKey() {
-        byte[] decodedKey = Base64.getDecoder().decode(jwtSecret);
-        return Keys.hmacShaKeyFor(decodedKey);
+        byte[] keyBytes = jwtSecret.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String generateToken(UserDetails userDetails) {

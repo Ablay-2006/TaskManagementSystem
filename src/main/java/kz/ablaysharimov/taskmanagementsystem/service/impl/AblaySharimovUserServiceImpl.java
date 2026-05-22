@@ -163,10 +163,17 @@ public class AblaySharimovUserServiceImpl implements AblaySharimovUserService {
     @Transactional(readOnly = true)
     public AblaySharimovUserResponse getCurrentUser() {
         log.debug("Getting current user");
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || auth.getName() == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        String username = auth.getName();
         AblaySharimovUser user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AblaySharimovResourceNotFoundException("User not found"));
         return userMapper.toResponse(user);
     }
+
 }
 
